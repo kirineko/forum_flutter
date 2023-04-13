@@ -7,7 +7,6 @@ import 'package:simple_forum_app/models/token.dart';
 
 final host = "https://forum.kirineko.tech";
 
-
 Future<List<Question>> fetchAllQuestions() async {
   var uri = "$host/api/questions";
   final response = await http.get(Uri.parse(uri.toString()));
@@ -15,7 +14,7 @@ Future<List<Question>> fetchAllQuestions() async {
   if (response.statusCode == 200) {
     // If the call to the server was successful, parse the JSON.
     return json
-        .decode(response.body)
+        .decode(utf8.decode(response.bodyBytes))
         .map<Question>((model) => Question.fromJson(model))
         .toList();
   } else {
@@ -24,14 +23,13 @@ Future<List<Question>> fetchAllQuestions() async {
   }
 }
 
-
 Future<Question> fetchQuestionById(String qId) async {
   var uri = "$host/api/questions/$qId";
   final response = await http.get(Uri.parse(uri));
 
   if (response.statusCode == 200) {
     // If the call to the server was successful, parse the JSON.
-    return Question.fromJson(json.decode(response.body));
+    return Question.fromJson(json.decode(utf8.decode(response.bodyBytes)));
   } else {
     // If that call was not successful, throw an error.
     throw Exception('Failed to load question');
@@ -46,7 +44,7 @@ Future<List<Answer>> fetchAllAnswers(String qId) async {
   if (response.statusCode == 200) {
     // If the call to the server was successful, parse the JSON.
     return json
-        .decode(response.body)
+        .decode(utf8.decode(response.bodyBytes))
         .map<Answer>((model) => Answer.fromJson(model))
         .toList();
   } else {
@@ -61,7 +59,7 @@ Future<Answer> fetchAnswerById(String qId, String aId) async {
 
   if (response.statusCode == 200) {
     // If the call to the server was successful, parse the JSON.
-    return Answer.fromJson(json.decode(response.body));
+    return Answer.fromJson(json.decode(utf8.decode(response.bodyBytes)));
   } else {
     // If that call was not successful, throw an error.
     throw Exception('Failed to load answer');
@@ -73,7 +71,7 @@ Future<Map<String, dynamic>> fetchData(String url) async {
 
   if (response.statusCode == 200) {
     // If the call to the server was successful, parse the JSON.
-    return json.decode(response.body);
+    return json.decode(utf8.decode(response.bodyBytes));
   } else {
     // If that call was not successful, throw an error.
     throw Exception('Failed to load data');
@@ -81,13 +79,12 @@ Future<Map<String, dynamic>> fetchData(String url) async {
 }
 
 Future<Map<String, dynamic>> fetchDataWithAuth(String url, String token) async {
-  final response = await http.get(Uri.parse("$host/api/$url"), headers: {
-    HttpHeaders.authorizationHeader: "Bearer $token"
-  });
+  final response = await http.get(Uri.parse("$host/api/$url"),
+      headers: {HttpHeaders.authorizationHeader: "Bearer $token"});
 
   if (response.statusCode == 200) {
     // If the call to the server was successful, parse the JSON.
-    return json.decode(response.body);
+    return json.decode(utf8.decode(response.bodyBytes));
   } else {
     // If that call was not successful, throw an error.
     throw Exception('Not authenticated');
@@ -95,11 +92,12 @@ Future<Map<String, dynamic>> fetchDataWithAuth(String url, String token) async {
 }
 
 Future<Token> getToken(Object data) async {
-  final response = await http.post(Uri.parse("$host/api/login/access-token"), body: data);
+  final response =
+      await http.post(Uri.parse("$host/api/login/access-token"), body: data);
 
   if (response.statusCode == 200) {
     // If the call to the server was successful, parse the JSON.
-    return Token.fromJson(json.decode(response.body));
+    return Token.fromJson(json.decode(utf8.decode(response.bodyBytes)));
   } else {
     // If that call was not successful, throw an error.
     throw Exception('Failed to get token');
@@ -107,7 +105,8 @@ Future<Token> getToken(Object data) async {
 }
 
 Future<bool> addQuestion(Object question) async {
-  final response = await http.post(Uri.parse("$host/api/questions/add"), body: json.encode(question));
+  final response = await http.post(Uri.parse("$host/api/questions/add"),
+      body: json.encode(question));
 
   if (response.statusCode == 200) {
     return true;
@@ -117,7 +116,9 @@ Future<bool> addQuestion(Object question) async {
 }
 
 Future<bool> addAnswer(String qId, Object answer) async {
-  final response = await http.post(Uri.parse("$host/api/questions/$qId/answers/add"), body: json.encode(answer));
+  final response = await http.post(
+      Uri.parse("$host/api/questions/$qId/answers/add"),
+      body: json.encode(answer));
 
   if (response.statusCode == 200) {
     return true;
